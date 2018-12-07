@@ -28,17 +28,18 @@ JupyterHub:
   # This is the address on which the proxy will bind.
   bind_url: "http://localhost:8010"
 
-  logo_file: "/srv/jupyterhub/ecocloud_logo.svg"
+  logo_file: "/srv/jupyterhub/hasscloud_logo.svg"
 
   ## Redirect user to server (if running), instead of control panel.
   redirect_to_server: false
 
   services:
-    - name: "ecocloud"
+    - name: "hasscloud"
       # the url the proxy will forward to
       url: 'http://0.0.0.0:10100'
       command:
         - python3
+        # FIXME: Fix the name of this script in the upsteam repo and image
         - /usr/local/bin/ecocloud_hub_service.py
         - --listen-url=http://0.0.0.0:10100
     - name: "cull-idle"
@@ -113,9 +114,9 @@ Spawner:
 DockerSpawner:
   host_ip: "0.0.0.0"
   image: "hub.bccvl.org.au/jupyter/scipy-notebook:0.9.4"
-  network_name: "ecocloud_dev_ecocloud"
+  network_name: "hasscloud_dev_hasscloud"
   volumes:
-    ecocloud_dev_jovyan: /home/jovyan
+    hasscloud_dev_jovyan: /home/jovyan
 
 
 NamespacedResourceReflector:

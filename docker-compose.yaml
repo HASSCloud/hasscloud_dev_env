@@ -1,13 +1,8 @@
-version: "3"
+version: "3.4"
 
 services:
-
-
-  # export:
-  # docker-compose run --rm keycloak -Dkeycloak.migration.action=export -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/tmp/keycloak -Dkeycloak.migration.realmName=local
-  #   need to ctrl-c keycloak after that as it starts up as well
   keycloak:
-    image: hub.bccvl.org.au/ecocloud/keycloak:4.4.0.Final
+    image: hub.bccvl.org.au/ecocloud/keycloak:4.4.0.Final-1
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
@@ -24,7 +19,7 @@ services:
     ports:
       - "8080:8080"
     networks:
-      - ecocloud
+      - hasscloud
     volumes:
       - keycloakdb:/opt/jboss/keycloak/standalone/data
       - ./config/keycloak:/tmp/keycloak
@@ -36,7 +31,7 @@ services:
     ports:
       - "8010:8000"
     networks:
-      - ecocloud
+      - hasscloud
     command:
       # listen externally for web requests
       - "--ip=0.0.0.0"
@@ -52,11 +47,10 @@ services:
     build:
       context: ./config/socat
     image: socat
-    # network_mode: service:jupyterhub
     ports:
       - "8081:8081"
     networks:
-      ecocloud:
+      hasscloud:
         aliases:
           - jupyterhub
     command:
@@ -70,8 +64,6 @@ services:
       dockerfile: ./config/jupyterhub/Dockerfile-jupyterhub
     image: docker-jupyterhub:latest
     user: root
-    # ports:
-    #   - "8081:8081"
     environment:
       - CONFIGPROXY_AUTH_TOKEN=proxytoken
       - OAUTH2_USERNAME_KEY=sub
@@ -79,7 +71,7 @@ services:
       - OAUTH_CLIENT_ID=jupyter
       - OAUTH_CLIENT_SECRET=d9a4b6eb-85dc-4a9c-b0dc-eea8f4bd6f38
       # $(openssl rand -hex 32)
-      - JUPYTERHUB_CRYPT_KEY=a522699faeb398d211de4e2ba0e10e47203cf011e378118d2ce1e8665122aef0
+      - JUPYTERHUB_CRYPT_KEY=df950b416f7e439073a2646ca4e5afeeab13631ff6b67c7267e47b8a2935f3b1
     volumes:
       - ./config/jupyterhub/jupyterhub-config.yaml:/etc/jupyterhub/jupyterhub-config.yaml
       - ./config/jupyterhub/profiles.yaml:/etc/jupyterhub/config/profiles.yaml
@@ -89,7 +81,7 @@ services:
     network_mode: service:jupyterhub_namespace
     restart: on-failure
     command:
-      - --DockerSpawner.network_name=${COMPOSE_PROJECT_NAME}_ecocloud
+      - --DockerSpawner.network_name=${COMPOSE_PROJECT_NAME}_hasscloud
 
   # workspace_socat_8080:
   # network namespace required to allow workspace access on container localhost to keycloak
@@ -101,7 +93,7 @@ services:
     ports:
       - "6543:6543"
     networks:
-      ecocloud:
+      hasscloud:
         aliases:
           - workspace
     command:
@@ -110,12 +102,9 @@ services:
       - TCP:keycloak:8080
 
   workspace:
+    # TODO: Make a copy of this in the tinker namespace and/or publish a new one
     image: hub.bccvl.org.au/ecocloud/workspace:0.5.0
-    # ports:
-    #   - "6543:6543"
     network_mode: service:workspace_namespace
-    # networks:
-    #   - ecocloud
     environment:
       # all these settings can be found in your openstack.rc file
       - OS_AUTH_URL=${OS_AUTH_URL}
@@ -156,23 +145,18 @@ services:
       - ./config/workspace/workspace.ini:/etc/workspace/production.ini
     restart: unless-stopped
     command:
-      # - paster
-      # - serve
-      # - /etc/workspace/production.ini
       - gunicorn
       - --paste
       - /etc/workspace/production.ini
-      # - -b
-      # - :6543
 
   workspace-ui:
-    image: hub.bccvl.org.au/ecocloud/workspace-ui:0.6.0
+    image: hub.bccvl.org.au/tinker/workspace-ui:0.5.1
     ports:
       - "5000:5000"
     volumes:
       - ./config/workspace/config.json:/usr/share/nginx/html/config.json
     networks:
-      - ecocloud
+      - hasscloud
 
   statsd:
     image: prom/statsd-exporter
@@ -182,14 +166,12 @@ services:
       # metrics port
       - "9102:9102"
     networks:
-      - ecocloud
+      - hasscloud
 
   smtp:
     image: python:3
-    # ports:
-    #  - 25:25
     networks:
-      - ecocloud
+      - hasscloud
     # for some reason, mails don't appear in docker logs without tty: True
     # tty: True
     command:
@@ -200,8 +182,6 @@ services:
       - -c
       - DebuggingServer
       - 0.0.0.0:25
-
-  # swift???
 
 volumes:
   jovyan:
@@ -214,5 +194,4 @@ volumes:
   keycloakdb:
 
 networks:
-  ecocloud:
-
+  hasscloud:

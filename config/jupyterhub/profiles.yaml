@@ -12,3 +12,9 @@ profile_list:
     kubespawner_override:
       # image_spec: hub.bccvl.org.au/jupyter/r-notebook:0.9.4
       image_spec: hub.bccvl.org.au/jupyter/r-notebook:0.9.4
+  - display_name: "HASS Notebook"
+    description: A Jupyter Notebook server with Python kernel and various HASS packages including  pre-installed.
+    default: false
+    kubespawner_override:
+      image_spec: hasscloud/jupyter-hass-notebook
+      # image_spec: hub.bccvl.org.au/jupyter/r-notebook:0.9.4

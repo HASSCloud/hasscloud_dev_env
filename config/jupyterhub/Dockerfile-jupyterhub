@@ -1,4 +1,4 @@
-FROM hub.bccvl.org.au/jupyter/jupyterhub:0.9.4-4
+FROM hub.bccvl.org.au/tinker/jupyterhub:0.9.4
 
 USER root
 
