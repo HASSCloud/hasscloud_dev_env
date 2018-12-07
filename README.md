@@ -38,7 +38,7 @@ Clone the workspace-ui repository:
 
 ```#!bash
 cd src
-git clone git@github.com:hasscloud/workspace-ui.git
+git clone git@github.com:HASSCloud/HASS-DEVL-workspace-ui.git workspace-ui
 cd ..
 ```
 
