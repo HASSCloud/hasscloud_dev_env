@@ -1,7 +1,7 @@
 profile_list:
   - display_name: "HASS Notebook"
     description: A Jupyter Notebook server with Python kernel and various HASS packages pre-installed.
-    default: false
+    default: true
     kubespawner_override:
       image_spec: hub.bccvl.org.au/tinker/jupyter-hass-notebook:latest
   - display_name: "RStudio Notebook"
